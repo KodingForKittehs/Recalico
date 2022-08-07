@@ -1,2 +1,2 @@
-# Recalico
-Kitty infused spaced repetition app.
+# Recalicode
+Kitty infused spaced repetition app
