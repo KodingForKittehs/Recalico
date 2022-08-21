@@ -1,14 +1,21 @@
 import os
-import pymongo
 import sys
+import pymongo
+from bson import ObjectId
+from bson.errors import InvalidId
+import users
 
 client = pymongo.MongoClient(os.environ.get('MONGODB_URL'))
 db = client.recallico
 
 
+def print_usage():
+    print('Usage: python add_flashcard.py <username> <question> <answer>')
+
+
 def add_flashcard(user, question, answer):
     if not user:
-        print('Username is missing')
+        print('User is missing')
         return
     if not question:
         print('Question is missing')
@@ -17,12 +24,24 @@ def add_flashcard(user, question, answer):
         print('Answer is missing')
         return
 
-    pass
+    try:
+        userid = ObjectId(user)
+    except InvalidId:
+        userid = users.get_user_id(db, user)
+
+    if not userid:
+        raise Exception(f'User "{user}" does not exist')
+
+    db.flashcards.insert_one({
+        'userid': userid,
+        'question': question,
+        'answer': answer
+    })
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print('Expected 3 arguments')
+    if len(sys.argv) != 4:
+        print_usage()
         exit(1)
 
-    add_flashcard(sys.argv[0], sys.argv[1]. sys.argv[2])
+    add_flashcard(sys.argv[1], sys.argv[2], sys.argv[3])
